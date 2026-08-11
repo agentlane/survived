@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { spawnSync } from 'node:child_process';
 import {
   isGitRepo,
+  isShallowRepo,
   headBranch,
   log,
   logNumstat,
@@ -75,6 +77,26 @@ describe('isGitRepo', () => {
 
   it('is false outside a repo', async () => {
     expect(await isGitRepo(nonRepo)).toBe(false);
+  });
+});
+
+describe('isShallowRepo', () => {
+  it('is false for a full clone', async () => {
+    expect(await isShallowRepo(dir)).toBe(false);
+  });
+
+  it('is true for a shallow clone', async () => {
+    const target = makeNonRepoDir();
+    try {
+      const res = spawnSync('git', ['clone', '--depth', '1', '-q', `file://${dir}`, 'shallow'], {
+        cwd: target,
+        encoding: 'utf8',
+      });
+      expect(res.status).toBe(0);
+      expect(await isShallowRepo(`${target}/shallow`)).toBe(true);
+    } finally {
+      cleanup(target);
+    }
   });
 });
 

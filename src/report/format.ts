@@ -59,6 +59,18 @@ export function dayOf(iso: string | null): string {
   return iso ? iso.slice(0, 10) : 'n/a';
 }
 
+/** True when lines exist but no cohort has aged past the first timepoint. */
+export function nothingMeasurableYet(report: SurvivalReport): boolean {
+  const all = [report.ai.high, report.ai.estimated, report.human];
+  const anyMeasurable = all.some((s) => TIMEPOINT_KEYS.some((k) => s[k].measurableLines > 0));
+  const anyLines = all.some((s) => TIMEPOINT_KEYS.some((k) => s[k].notYetMeasurableLines > 0));
+  return !anyMeasurable && anyLines;
+}
+
+export const TOO_YOUNG_MESSAGE =
+  'no cohort has reached 30 days of history yet — survival cannot be measured. ' +
+  'Re-run once the repository is older.';
+
 /** Shared honesty copy — printed instead of percentages under low coverage. */
 export function lowCoverageMessage(report: SurvivalReport): string {
   return (

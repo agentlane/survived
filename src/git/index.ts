@@ -60,6 +60,12 @@ export async function isGitRepo(repoPath: string): Promise<boolean> {
   }
 }
 
+/** Shallow clones lack the history blame needs — callers must refuse them. */
+export async function isShallowRepo(repoPath: string): Promise<boolean> {
+  const stdout = await runGit(repoPath, ['rev-parse', '--is-shallow-repository']);
+  return stdout.trim() === 'true';
+}
+
 /** Current branch name, or null on a detached HEAD. */
 export async function headBranch(repoPath: string): Promise<string | null> {
   const { stdout, exitCode } = await runGitExitCode(

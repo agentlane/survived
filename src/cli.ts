@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { Command } from 'commander';
-import { isGitRepo } from './git/index.js';
+import { isGitRepo, isShallowRepo, headBranch } from './git/index.js';
 import { scanRepo } from './attribution/scan.js';
 import { renderScan } from './report/scan.js';
 import { analyseSurvival, type EngineOptions } from './survival/engine.js';
@@ -79,6 +79,16 @@ async function requireRepo(): Promise<string> {
     );
     process.exit(1);
   }
+  if (await isShallowRepo(cwd)) {
+    process.stderr.write(
+      'survived: this is a shallow clone — blame cannot attribute lines without full history.\n' +
+        'Fetch the full history first: git fetch --unshallow\n',
+    );
+    process.exit(1);
+  }
+  if ((await headBranch(cwd)) === null) {
+    process.stderr.write('survived: detached HEAD — analysing the current checkout as-is.\n');
+  }
   return cwd;
 }
 
@@ -91,5 +101,21 @@ program
     const { summary } = await scanRepo(repo, { heuristics: opts.heuristics });
     process.stdout.write(renderScan(summary));
   });
+
+program.addHelpText(
+  'after',
+  `
+Examples:
+  npx survived                          headline report for the current repo
+  survived scan                         attribution coverage only (fast spike)
+  survived --json > result.json         full machine-readable result
+  survived --html --out report.html     self-contained report with charts
+  survived --md --out SURVIVAL.md       markdown report
+  survived --since 2024-01-01           limit analysis window
+  survived --max-commits 5000           cap analysed commits
+  survived --no-heuristics              high-confidence attribution only
+
+Exit codes: 0 report produced · 1 unusable repository · 2 usage error`,
+);
 
 await program.parseAsync(process.argv);

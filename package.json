@@ -5,7 +5,9 @@
   "scripts": {
     "test": "vitest run",
     "build": "tsc -p tsconfig.build.json",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit",
+    "prepack": "npm run build"
   },
   "license": "Apache-2.0",
   "type": "module",

@@ -9,6 +9,8 @@ import {
   latestMeasurable,
   worstDirectory,
   dayOf,
+  nothingMeasurableYet,
+  TOO_YOUNG_MESSAGE,
 } from './format.js';
 
 /** Headline block: ~20 lines. picocolors disables itself when stdout is not a TTY. */
@@ -28,6 +30,12 @@ export function renderTerminal(report: SurvivalReport): string {
 
   if (isLowCoverage(report)) {
     out.push(`  ${lowCoverageMessage(report)}`);
+    out.push('');
+    return out.join('\n') + '\n';
+  }
+
+  if (nothingMeasurableYet(report)) {
+    out.push(`  ${TOO_YOUNG_MESSAGE}`);
     out.push('');
     return out.join('\n') + '\n';
   }

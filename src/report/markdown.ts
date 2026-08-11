@@ -8,6 +8,8 @@ import {
   latestMeasurable,
   worstDirectory,
   dayOf,
+  nothingMeasurableYet,
+  TOO_YOUNG_MESSAGE,
 } from './format.js';
 
 /** Same content as the terminal report, as markdown. */
@@ -26,6 +28,12 @@ export function renderMarkdown(report: SurvivalReport): string {
 
   if (isLowCoverage(report)) {
     out.push(`> ${lowCoverageMessage(report)}`);
+    out.push('');
+    return out.join('\n');
+  }
+
+  if (nothingMeasurableYet(report)) {
+    out.push(`> ${TOO_YOUNG_MESSAGE}`);
     out.push('');
     return out.join('\n');
   }
