@@ -1,4 +1,4 @@
-import pc from 'picocolors';
+import { createColors } from 'picocolors';
 import type { SurvivalReport } from '../survival/types.js';
 import {
   aiAttributedLines,
@@ -13,7 +13,11 @@ import {
   TOO_YOUNG_MESSAGE,
 } from './format.js';
 
-/** Headline block: ~20 lines. picocolors disables itself when stdout is not a TTY. */
+// Strictly TTY-gated (spec: no colour when not a TTY). picocolors' own
+// default would also colorize when CI=true, which breaks that rule.
+const pc = createColors(process.stdout.isTTY === true);
+
+/** Headline block: ~20 lines, colour only on a real TTY. */
 export function renderTerminal(report: SurvivalReport): string {
   const out: string[] = [];
   const pad = (s: string) => s.padEnd(13);

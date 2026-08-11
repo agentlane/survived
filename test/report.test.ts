@@ -44,6 +44,8 @@ describe('terminal renderer', () => {
   it('renders the headline block', () => {
     const out = renderTerminal(report);
     expect(out).toMatchSnapshot();
+    // Spec: no colour when stdout is not a TTY — including CI environments.
+    expect(out).not.toContain('\u001b[');
     expect(out).toContain('2024-01-01');
     expect(out).toContain('60.0%'); // AI high 30d
     expect(out).toContain('25.0%'); // AI high 90d
