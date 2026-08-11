@@ -5,6 +5,7 @@ import {
   log,
   logNumstat,
   showNumstatDiff,
+  diffFileHunks,
   blameFile,
   readNotes,
   GitError,
@@ -163,6 +164,23 @@ describe('showNumstatDiff', () => {
   it('reports no added lines for a pure deletion', async () => {
     const files = await showNumstatDiff(dir, hashes[20]!);
     expect(files).toEqual([]);
+  });
+});
+
+describe('diffFileHunks', () => {
+  it('reports a replacement hunk with old and new counts', async () => {
+    const hunks = await diffFileHunks(dir, hashes[0]!, 'HEAD', 'alpha.txt');
+    expect(hunks).toEqual([{ oldStart: 3, oldCount: 1, newCount: 1 }]);
+  });
+
+  it('reports a pure deletion when the file is gone', async () => {
+    const hunks = await diffFileHunks(dir, hashes[1]!, 'HEAD', 'f1.txt');
+    expect(hunks).toEqual([{ oldStart: 1, oldCount: 3, newCount: 0 }]);
+  });
+
+  it('reports no hunks for an untouched file', async () => {
+    const hunks = await diffFileHunks(dir, hashes[2]!, 'HEAD', 'f2.txt');
+    expect(hunks).toEqual([]);
   });
 });
 

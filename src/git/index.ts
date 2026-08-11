@@ -178,6 +178,40 @@ export async function showNumstatDiff(repoPath: string, commit: string): Promise
   }));
 }
 
+export interface DiffHunk {
+  oldStart: number;
+  oldCount: number;
+  newCount: number;
+}
+
+/**
+ * Zero-context hunks for one file between two refs. Old-side line numbers
+ * are in `fromRef` coordinates — the survival engine intersects them with a
+ * commit's added ranges to split dead lines into rewritten vs deleted.
+ */
+export async function diffFileHunks(
+  repoPath: string,
+  fromRef: string,
+  toRef: string,
+  path: string,
+): Promise<DiffHunk[]> {
+  const stdout = await runGit(repoPath, [
+    '-c', 'core.quotePath=false',
+    'diff', '--unified=0', '--no-color', '--no-renames', fromRef, toRef, '--', path,
+  ]);
+  const hunks: DiffHunk[] = [];
+  for (const line of stdout.split('\n')) {
+    const m = /^@@ -(\d+)(?:,(\d+))? \+\d+(?:,(\d+))? @@/.exec(line);
+    if (!m) continue;
+    hunks.push({
+      oldStart: Number(m[1]),
+      oldCount: m[2] === undefined ? 1 : Number(m[2]),
+      newCount: m[3] === undefined ? 1 : Number(m[3]),
+    });
+  }
+  return hunks;
+}
+
 /** Line -> origin commit at `ref`, via `git blame --porcelain`. */
 export async function blameFile(repoPath: string, ref: string, path: string): Promise<BlameLine[]> {
   const stdout = await runGit(repoPath, [

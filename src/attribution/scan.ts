@@ -28,14 +28,20 @@ export interface ScanOptions {
   heuristics: boolean;
 }
 
+/** Merged commit -> note text across all AI notes refs (read-only). */
+export async function readAiNotes(repoPath: string): Promise<Map<string, string>> {
+  const maps = await Promise.all(AI_NOTES_REFS.map((ref) => readNotes(repoPath, ref)));
+  const notes = new Map<string, string>();
+  for (const m of maps) for (const [k, v] of m) notes.set(k, v);
+  return notes;
+}
+
 export async function scanRepo(repoPath: string, opts: ScanOptions): Promise<ScanResult> {
-  const [commits, stats, ...noteMaps] = await Promise.all([
+  const [commits, stats, notes] = await Promise.all([
     log(repoPath),
     logNumstat(repoPath),
-    ...AI_NOTES_REFS.map((ref) => readNotes(repoPath, ref)),
+    readAiNotes(repoPath),
   ]);
-  const notes = new Map<string, string>();
-  for (const m of noteMaps) for (const [k, v] of m) notes.set(k, v);
 
   const attributions = attributeCommits(commits, notes, stats, opts);
 
