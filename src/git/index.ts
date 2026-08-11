@@ -42,6 +42,11 @@ export interface BlameLine {
   origin: string;
 }
 
+export interface CommitStats {
+  added: number;
+  deleted: number;
+}
+
 export async function isGitRepo(repoPath: string): Promise<boolean> {
   try {
     const { stdout, exitCode } = await runGitExitCode(
@@ -95,6 +100,35 @@ export async function log(repoPath: string, opts: LogOptions = {}): Promise<Comm
         trailers: parseTrailers(trailerBlock),
       };
     });
+}
+
+/**
+ * Added/deleted line counts per commit in a single subprocess
+ * (`git log --numstat`). Binary files ("-" counts) and merge commits
+ * (no numstat block by default) contribute zero.
+ */
+export async function logNumstat(repoPath: string, opts: LogOptions = {}): Promise<Map<string, CommitStats>> {
+  const args = ['-c', 'core.quotePath=false', 'log', '--numstat', `--format=${RECORD_SEP}%H`];
+  if (opts.maxCount !== undefined) args.push(`--max-count=${opts.maxCount}`);
+  if (opts.since !== undefined) args.push(`--since=${opts.since}`);
+  args.push(opts.ref ?? 'HEAD');
+  const stdout = await runGit(repoPath, args);
+  const stats = new Map<string, CommitStats>();
+  for (const record of stdout.split(RECORD_SEP)) {
+    const lines = record.split('\n').filter((l) => l.length > 0);
+    const hash = lines[0];
+    if (!hash) continue;
+    let added = 0;
+    let deleted = 0;
+    for (const line of lines.slice(1)) {
+      const m = /^(\d+|-)\t(\d+|-)\t/.exec(line);
+      if (!m) continue;
+      if (m[1] !== '-') added += Number(m[1]);
+      if (m[2] !== '-') deleted += Number(m[2]);
+    }
+    stats.set(hash, { added, deleted });
+  }
+  return stats;
 }
 
 function parseTrailers(block: string): Trailer[] {

@@ -1,19 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { spawnSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
 import { makeRepo, makeNonRepoDir, commit, cleanup } from './fixtures/repo.js';
-
-const cliPath = fileURLToPath(new URL('../src/cli.ts', import.meta.url));
-// Absolute specifier: the spawned process runs with cwd outside this project,
-// so a bare "tsx" would not resolve.
-const tsxUrl = import.meta.resolve('tsx');
-
-function runCli(args: string[], cwd: string) {
-  return spawnSync(process.execPath, ['--import', tsxUrl, cliPath, ...args], {
-    cwd,
-    encoding: 'utf8',
-  });
-}
+import { runCli } from './fixtures/run-cli.js';
 
 let repo: string;
 let nonRepo: string;

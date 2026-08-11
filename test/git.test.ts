@@ -3,6 +3,7 @@ import {
   isGitRepo,
   headBranch,
   log,
+  logNumstat,
   showNumstatDiff,
   blameFile,
   readNotes,
@@ -119,6 +120,21 @@ describe('log', () => {
   it('fails loudly with git stderr on a bad ref', async () => {
     await expect(log(dir, { ref: 'no-such-ref' })).rejects.toThrowError(GitError);
     await expect(log(dir, { ref: 'no-such-ref' })).rejects.toThrowError(/no-such-ref/);
+  });
+});
+
+describe('logNumstat', () => {
+  it('returns added/deleted counts for every commit in one call', async () => {
+    const stats = await logNumstat(dir);
+    expect(stats.size).toBe(22);
+    expect(stats.get(hashes[2]!)).toEqual({ added: 3, deleted: 0 });
+    expect(stats.get(hashes[19]!)).toEqual({ added: 1, deleted: 1 });
+    expect(stats.get(hashes[20]!)).toEqual({ added: 0, deleted: 3 });
+  });
+
+  it('respects maxCount', async () => {
+    const stats = await logNumstat(dir, { maxCount: 3 });
+    expect(stats.size).toBe(3);
   });
 });
 

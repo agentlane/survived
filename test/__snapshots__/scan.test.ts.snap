@@ -1,0 +1,50 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`scanRepo > classifies every planted commit exactly 1`] = `
+[
+  {
+    "source": null,
+    "subject": "chore: seed",
+  },
+  {
+    "confidence": "high",
+    "source": "trailer",
+    "subject": "feat: add engine",
+    "tool": "claude",
+  },
+  {
+    "confidence": "high",
+    "source": "trailer",
+    "subject": "docs: update guide",
+    "tool": "aider",
+  },
+  {
+    "confidence": "high",
+    "source": "notes",
+    "subject": "refactor: tidy io",
+    "tool": "cursor",
+  },
+  {
+    "confidence": "high",
+    "source": "author",
+    "subject": "fix: adjust retry",
+    "tool": "devin",
+  },
+  {
+    "source": null,
+    "subject": "chore: bump deps",
+  },
+  {
+    "confidence": "estimated",
+    "source": "heuristic",
+    "subject": "add parser module",
+    "tool": null,
+  },
+  {
+    "confidence": "estimated",
+    "source": "heuristic",
+    "subject": "add parser tests",
+    "tool": null,
+  },
+]
+`;
