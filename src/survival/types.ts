@@ -33,6 +33,8 @@ export interface ToolRow {
 export interface SurvivalReport {
   timepointDays: number[];
   analysedCommits: number;
+  /** Author-date span of the analysed commits (oldest, newest). */
+  range: { start: string | null; end: string | null };
   aiCommits: { high: number; estimated: number };
   /** Estimated tier reported separately — never blended (product contract). */
   ai: { high: SurvivalStats; estimated: SurvivalStats };

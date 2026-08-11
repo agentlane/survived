@@ -253,6 +253,10 @@ function aggregate(
   return {
     timepointDays: [...TIMEPOINT_DAYS],
     analysedCommits: analysed.length,
+    range: {
+      start: analysed.at(-1)?.authorDate ?? null,
+      end: analysed[0]?.authorDate ?? null,
+    },
     aiCommits: {
       high: aiCohorts.filter((c) => c.attribution!.confidence === 'high').length,
       estimated: aiCohorts.filter((c) => c.attribution!.confidence === 'estimated').length,
