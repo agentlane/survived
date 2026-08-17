@@ -1,6 +1,6 @@
 {
   "name": "survived",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Measures how much AI-generated code in a git repository is still alive after 30/60/90 days, next to a human baseline",
   "scripts": {
     "test": "vitest run",
