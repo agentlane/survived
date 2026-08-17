@@ -23,7 +23,7 @@
     "vitest": "^4.1.10"
   },
   "bin": {
-    "survived": "./dist/cli.js"
+    "survived": "dist/cli.js"
   },
   "engines": {
     "node": ">=20"
